@@ -4,7 +4,8 @@
     state: present
     update_cache: yes
   loop:
-    - java-1.8.0-openjdk-devel
+    - unzip
+ #  - java-1.8.0-openjdk-devel
     
 - name: add jenkins lts repository
   get_url:

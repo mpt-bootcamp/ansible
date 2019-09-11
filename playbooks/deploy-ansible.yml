@@ -35,5 +35,7 @@
 
   roles:
     - { role: common }
+#   - { role: openjdk }    
     - { role: ansible }
+    - { role: jenkins }
  

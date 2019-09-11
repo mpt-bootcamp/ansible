@@ -1,2 +1,18 @@
 ---
 # handlers file for jenkins
+
+- name: wait for jenkins
+  uri:
+    url: "http://localhost:{{ jenkins_port }}{{ jenkins_context_path | default('') }}/login"
+    status_code: 200
+  register: jenkins_login_page
+  until: jenkins_login_page.status == 200
+  retries: 60
+  delay: 1
+
+- name: restart jenkins
+  service:
+    name: "{{ jenkins_svc_name }}"
+    state: restarted
+  notify: wait for jenkins
+

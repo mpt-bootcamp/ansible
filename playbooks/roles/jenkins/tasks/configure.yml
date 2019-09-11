@@ -1,0 +1,70 @@
+---
+# configure /etc/default/jenkins
+
+#Jenkins -> Manage Jenkins -> Configure System
+#${JENKINS_HOME} — Absolute path of the Jenkins home directory
+#${ITEM_ROOTDIR} — Absolute path of the directory where Jenkins stores the configuration and related metadata for a given job
+#${ITEM_FULL_NAME} — The full name of a given job, which may be slash-separated, e.g. foo/bar for the job bar in folder foo
+
+- name: create the jenkins_home and ownership
+  file:
+    dest: "{{ jenkins_home }}"
+    state: directory
+    owner: "{{ jenkins_owner }}"
+    group: "{{ jenkins_group }}"
+    recurse: yes
+
+- name: create the jenkins backup directory and ownership 
+  file:
+    path: "{{jenkins_backup_dir}}"
+    state: directory
+    owner: "{{ jenkins_owner }}"
+    group: "{{ jenkins_group }}"
+    recurse: yes
+
+- name: set Jenkins root url if it is not already done
+  template:
+    src: "jenkins.model.JenkinsLocationConfiguration.xml.j2"
+    dest: "{{ jenkins_home }}/jenkins.model.JenkinsLocationConfiguration.xml"
+    owner: "{{ jenkins_owner }}"
+    group: "{{ jenkins_group }}"
+    force: no   
+
+- name: configure jenkins port
+  lineinfile:
+    dest: /etc/default/jenkins
+    regexp: ^HTTP_PORT= 
+    line: "HTTP_PORT={{ jenkins_port }}"
+
+- name: configure jenkins context path
+  lineinfile:
+    dest: /etc/default/jenkins
+    regexp: ^PREFIX=
+    line: "PREFIX={{ jenkins_context_path }}"
+  when: jenkins_context_path is defined
+
+- name: configure command Line arguments
+  lineinfile:
+    dest: /etc/default/jenkins
+    regexp: '^JENKINS_ARGS='
+    line: 'JENKINS_ARGS="--webroot=/var/cache/$NAME/war --httpPort=$HTTP_PORT --prefix=$PREFIX"'
+
+- name: configure jenkins home
+  lineinfile:
+    dest: /etc/default/jenkins
+    regexp: '^JENKINS_HOME='
+    line: 'JENKINS_HOME={{ jenkins_home }}'
+
+# This is to disable the setup wizard. The auto-generated password for the 
+# default 'admin' account will be written out to:
+#   /var/lib/jenkins/secrets/initialAdminPassword.
+- name: configure JVM arguments
+  lineinfile:
+    dest: /etc/default/jenkins
+    regexp: '^JAVA_ARGS='
+    line: 'JAVA_ARGS="-Djava.awt.headless=true -Djenkins.install.runSetupWizard=false"'
+  notify:
+    - restart jenkins
+
+# fire any pending restart handlers.
+- meta: flush_handlers

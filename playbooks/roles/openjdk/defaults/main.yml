@@ -9,5 +9,5 @@ openjdk_owner: root
 openjdk_group: root
 openjdk_pkg: openjdk-{{openjdk_version}}_linux-x64_bin.tar.gz
 openjdk_url: https://download.java.net/java/GA/jdk11/9/GPL/{{openjdk_pkg}}
-openjdk_home: "{{ java_home | default('/usr/java') }}"
+openjdk_home: "{{ java_home | default('/apps/java') }}"
 

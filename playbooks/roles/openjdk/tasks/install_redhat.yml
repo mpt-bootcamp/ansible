@@ -31,11 +31,3 @@
     recurse: yes  
   when: openjdk.stat.exists == false
 
-#- name: create a java bin symlink 
-#  file:
-#    path: "/usr/bin/java"
-#    src: "{{openjdk_home}}/jdk-{{openjdk_version}}"
-#    owner: "{{ openjdk_owner | default('root')}}"
-#    group: "{{ openjdk_group | default('root')}}"
-#    state: link
-#  when: openjdk.stat.exists == false   

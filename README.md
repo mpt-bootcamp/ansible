@@ -5,7 +5,7 @@
 ## Ansible CLI
 
 ### Initializing role boilerplate
-```
+```console
 
 ansible-playbook init <role path and name>
 
