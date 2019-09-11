@@ -1,0 +1,37 @@
+- name: install required packages for jenkins
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+    allow_unauthenticated: yes
+  loop:
+    - openjdk-8-jdk
+
+- name: add jenkins lts key
+  apt_key:
+    url: https://pkg.jenkins.io/debian/jenkins-ci.org.key
+    state: present
+
+- name: add jenkins lts repository
+  apt_repository:
+    filename: jenkins.list
+    repo: deb https://pkg.jenkins.io/debian-stable binary/
+    state: present
+
+- name: install jenkins lts version
+  apt:
+    name: jenkins={{jenkins_version}}
+    state: present
+    update_cache: yes    
+
+- name: restart the service
+  systemd:
+    daemon_reload: yes
+    state: restarted
+    name: jenkins    
+
+- name: make sure the service is running
+  systemd:
+    state: started
+    enabled: yes
+    name: jenkins

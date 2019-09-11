@@ -1,0 +1,11 @@
+---
+# defaults file for jenkins
+
+jenkins_name: jenkins
+jenkins_svc_name: jenkins
+jenkins_version: 2.176.2
+
+jenkins_owner: jenkins
+jenkins_group: renkins
+
+jenkins_backup_dir: /appdata/jenkins/backup
