@@ -1,2 +1,7 @@
 ---
 # defaults file for ansible
+
+# set in file/requirements.txt
+
+# ansible_verson: 2.8.4
+# ansible_verson: 2.5.1
