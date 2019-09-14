@@ -12,8 +12,10 @@
     state: present
 
 - name: run OS specific installation steps
-  include: "install_{{ ansible_os_family | lower }}.yml" 
+  include: "install_{{ ansible_os_family | lower }}.yml"
 
+- name: setup default website
+  include: "setup_default_site.yml"
 
 - name: enable apache service on startup
   service:
