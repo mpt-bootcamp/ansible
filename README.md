@@ -5,19 +5,6 @@ This project contains the playbooks and roles used for system configurations and
 
 Ansible is an automation tool commonly used for cloud provisioning, configuration management, application deployment. It is agentless and simple to install and use.
 
-Ansible works by connecting to the managed nodes from a control machine, and pushing out small programs, called "modules" to them. Ansible then executes these modules over SSH by default, and removes them when finished. While passwords are supported, but SSH keys are the preferred way to use Ansible.
-
-Ansible represents machines it manages using a file (INI or YAML formatted) to put all of machines, or put them in groups.
-
-```
-[consoles]
-console[1:20].missionpeaktechnologies.com
-
-
-[runners]
-runner[1:20].lab.mpt.local
-```
-
 
 Usage
 ------------
