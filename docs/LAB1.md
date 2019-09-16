@@ -34,6 +34,7 @@ http://console<n>.missionpeaktechnologies.com:8000/
 ```
 2. Enter student\<n\>/student\<n\> for the usernamme and passowrd. For example, student1/student1
 3. Next click the "Terminal" icon to open a web terminal session
+![Custom Apache Home Page](images/console-home.png)
 4. Enter the following command to verified the installted Python and version
 ```console
 cd ~/
