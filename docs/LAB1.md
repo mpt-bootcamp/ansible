@@ -163,9 +163,9 @@ ansible-playbook --limit runner<n>.lab.mpt.local -u ubuntu --private-key=~/.ssh/
 To verify the LAMP stack is correctly installed and configured by Ansible, open the following URL with Chrome or any web browser.
 
 ```
-http://runner\<n\>.missionpeaktechnologies.com/
+http://runner<n>.missionpeaktechnologies.com/
 ```
-Note, you need to replace <n> with your student number. For example,
+Note, you need to replace \<n\> with your student number. For example,
 ```
 http://runner1.missionpeaktechnologies.com/
 ```
