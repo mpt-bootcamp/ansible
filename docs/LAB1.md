@@ -150,7 +150,7 @@ runner1.lab.mpt.local | SUCCESS => {
 
 With Ansible is ready to use, let's see how we can use it to install the Apache, MySQL and PHP on a Linux machine (LAMP). Open a Terminal window and enter the following commands
 
-```
+```console
 mkdir -p ~/bootcamp
 cd ~/bootcamp
 git clone https://github.com/mpt-bootcamp/ansible.git
