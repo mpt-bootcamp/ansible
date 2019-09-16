@@ -32,7 +32,7 @@ Ansible works by connecting to the managed nodes from a control machine, and pus
 ```
 http://console<n>.missionpeaktechnologies.com:8000/
 ```
-2. Enter student\<n\>/student\<n\> for the usernamme and passowrd. For example, student1/student1
+2. Enter student\<n\>/student\<n\> for the username and passowrd. For example, student1/student1
 3. Next click the "Terminal" icon to open a web terminal session
 ![Custom Apache Home Page](images/console-home.png)
 4. Enter the following command to verified the installted Python and version
@@ -148,7 +148,7 @@ runner1.lab.mpt.local | SUCCESS => {
 
 #### Run a playbook to install and configure a LAMP stack
 
-With Ansible is ready to use, let's see how we can use it to install the Apache, MySQL and PHP on a Linux machine (LAMP). Open a Terminal window and enter the following commands
+With Ansible is ready to use, let's see how we can use it to install Apache, MySQL and PHP on a Linux machine (LAMP). Open a Terminal window and enter the following commands
 
 ```console
 mkdir -p ~/bootcamp
@@ -165,7 +165,7 @@ To verify the LAMP stack is correctly installed and configured by Ansible, open 
 ```
 http://runner\<n\>.missionpeaktechnologies.com/
 ```
-Note, you need to replace \<n\> with your student number. For example,
+Note, you need to replace <n> with your student number. For example,
 ```
 http://runner1.missionpeaktechnologies.com/
 ```
