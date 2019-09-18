@@ -90,7 +90,7 @@ $ ls -ltr
 #### Exercise 4 - Copy the public to the remote host
 ```console
 # Ping the if the remote host is reachable by Ansible
-ansible runner1.lab.mpt.local -m ping -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu
+$ ansible runner1.lab.mpt.local -m ping -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu
 
 # Use Ansible authorized_key module to copy the SSH public key to the remote host
 $ ansible dev01 --become -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu -m authorized_key -a "user=$USER state=present key={{lookup('file', '~/.ssh/id_rsa.pub')}} manage_dir=yes"
