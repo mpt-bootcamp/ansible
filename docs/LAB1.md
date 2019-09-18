@@ -17,7 +17,7 @@ Playbooks are files that you define the configurations and tasks to play in the 
 
 Ansible works by connecting to the managed nodes from a control machine, and pushing out small programs, called "modules" defined in the playbook to them. Ansible then executes these modules over SSH by default, and removes them when finished. While passwords are supported, but SSH keys are the preferred and secured way to use Ansible.
 
-### Exercises
+### Lab Exercises
 
 * Login to an EC2 control machine using a Web terminal (Jupyter)
 * Create a default inventory and configuration file
@@ -82,9 +82,9 @@ sudo vi /etc/ansible/hosts
 runner[1:20].missionpeaktechnologies.com        
 </pre>
 
-#### Copy the Ansible admin user SSH key
+#### Exercise 1 - Copy the Ansible sudo user (ubuntu) SSH key
 
-After creating a new machine or virtual machine, it is the best practice to harden the system security by disabling user/password login and enabling login using SSH key only. To use Ansible, we either need to generate a SSH key pair (private and public), or use an existing key pair with an administor user account. In this exercise, we will use the existing SSH key associated with the ubuntu user (for the Ubuntu OS). We will cover more detail in [LAB2 - SSH Basic](LAB2.md)
+After creating a new machine or virtual machine, it is the best practice to harden the system security by disabling user/password login and enabling login using SSH key only. To use Ansible, we either need to generate a SSH key pair (private and public), or use an existing key pair with an administor user account. In this exercise, we will use the existing SSH key associated with the ubuntu user (for the Ubuntu OS). We will cover more detail in [LAB2 - SSH Connection and Privilege Escalation](LAB2.md)
 
 ```console
 mkdir -p ~/.ssh
@@ -102,7 +102,7 @@ drwxr-xr-x 5 student1 student1 4096 Sep 16 03:57 ..
 -rw------- 1 student1 student1 1675 Sep 16 03:01 id_rsa_ubuntu
 ```
 
-#### Verify Ansible is ready to use
+#### Exercise 2 - Verify Ansible is ready to use
 
 To verify Ansible is installed, configured, and ready to use, enter the following commands in the Terminal window. The output should like something below.
 
@@ -146,7 +146,7 @@ runner1.lab.mpt.local | SUCCESS => {
 
 ```
 
-#### Run a playbook to install and configure a LAMP stack
+#### Exercise 3 - Run a playbook to install and configure a LAMP stack
 
 With Ansible is ready to use, let's see how we can use it to install Apache, MySQL and PHP on a Linux machine (LAMP). Open a Terminal window and enter the following commands
 
@@ -174,4 +174,4 @@ http://runner1.missionpeaktechnologies.com/
 
 
 ---
-### End of Lab1
+### End of LAB1

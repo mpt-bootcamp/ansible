@@ -11,3 +11,4 @@
       - ntp
       - aptitude
       - python-apt
+      - nmap
