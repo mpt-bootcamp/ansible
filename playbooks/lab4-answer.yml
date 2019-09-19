@@ -1,31 +1,4 @@
-## LAB4 - Playbooks
-
-### Goal
-In this lab, you will learn the Ansible playbook structure by writing a playbook to install Elasticsearch ELK 
-
-#### Playbook Structure
-
-module
-hosts
-variable
-play
-task
-handler
-loop
-facts
-conditional
-error handling
-role
-
-### Lab Exercises
-
-#### Exercise 1 - 
-#### Exercise 2 - 
-#### Exercise 3 - 
-
-
-#### Completed Playbook
-```
+---
 # The playbook to install and configure Elasticsearch ELK
 # Kibana status check: 
 # http:<hostname>5601/status
@@ -117,13 +90,3 @@ role
 
 # kibana
 #localhost:5601/status
-```
-
-Run playbook
-
-```console
-ansible-playbook -i dev01, -u vagrant lab4-answer.yml
-```
-
-### Reference
-https://www.digitalocean.com/community/tutorials/configuration-management-101-writing-ansible-playbooks
