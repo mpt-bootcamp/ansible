@@ -9,6 +9,8 @@
   gather_facts: false
 
   pre_tasks:
+  - debug:
+    msg: 
   - name: install Python on Ubuntu OS only
     raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
     when: 1==1
@@ -23,7 +25,7 @@
     elastic_group: elastic
     elastic_version: 7.3.2
     elastic_pkg_folder: 7.x
-    alastic_home: /apps/elastic
+    elastic_home: /apps/elastic
          
   pre_tasks:
     - name: create the elastic user group
@@ -38,6 +40,20 @@
         state: present
 
   tasks:
+  - name: "check if the {{elastic_home}} directory exists"
+    stat:
+      path: "{{ elastic_home }}"
+    register: elastic_home_check
+
+  - name: print debug information
+    debug: 
+      var: elastic_home_check
+
+  - name: show conditional messages and facts (OS distribution)
+    debug:
+      msg: "{{ elastic_home }} does not existing. default location /var/lib/elasticsearch will be used ({{ ansible_distribution }})"
+    when: elastic_home_check.stat.exists == false   
+
   - name: add elasticsearch public signing key
     apt_key:
       url: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
@@ -48,7 +64,7 @@
       repo: "deb https://artifacts.elastic.co/packages/{{ elastic_pkg_folder }}/apt stable main"
       update_cache: yes
       state: present
-    
+
   - name: install elasticsearch ELK components
     apt:
       name: "{{item.name}}={{item.version}}"

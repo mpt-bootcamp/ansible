@@ -3,127 +3,62 @@
 ### Goal
 In this lab, you will learn the Ansible playbook structure by writing a playbook to install Elasticsearch ELK 
 
-#### Playbook Structure
+#### Playbook Format
 
-module
-hosts
-variable
-play
-task
-handler
-loop
-facts
-conditional
-error handling
-role
+Playbooks are YAML files containing a series of directives to provision and bring a system to a desired state. When writing in YAML, you need to be extra careful to maintain the correct indentation and use ***space*** instead of  ***tab***
+
+Below is a simple playbook to install unzip and tree command tools.
+
+```
+---
+- hosts: all
+  become: true
+  tasks:
+  - name: install unzip 
+    apt: 
+      update_cache: yes
+      name: {{item}}
+    loop:
+      - unzip
+      - tree
+```
+
 
 ### Lab Exercises
 
-#### Exercise 1 - 
-#### Exercise 2 - 
-#### Exercise 3 - 
+#### Exercise 1 - Create a playbook boilerplate
 
+In the playbooks directory of the ansible project, `~/bootcamp/ansible/playbooks, create the playbook file, ***lab4.yml***, and add the following lines.
 
-#### Completed Playbook
 ```
+---
 # The playbook to install and configure Elasticsearch ELK
-# Kibana status check: 
-# http:<hostname>5601/status
-
-# This play is to install Python required for Ansible on Ubuntu OS only. 
-- hosts: all
-  become: true
-  gather_facts: false
-
-  pre_tasks:
-  - name: install Python on Ubuntu OS only
-    raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
-    when: 1==1
+# http:<hostname>5601
 
 # The play below are the tasks to install Elasticsearch ELK
 - hosts: all
   become: yes
   gather_facts: true
+```
 
+#### Exercise 2 - Working with variables
+
+Variables give you more flexibility in writing playbooks and roles. They can be used to loop through a set of given values, access various information like the hostname of a system and replace certain strings in templates by with specific values. They are referenced via curly brackets **{{ }}**.
+
+Append the variable section to the playbook (lab4.yml). These variables define the version and attributes to install Elasticsearch.
+```
   vars:
     elastic_owner: elastic
     elastic_group: elastic
     elastic_version: 7.3.2
     elastic_pkg_folder: 7.x
-    alastic_home: /apps/elastic
-         
-  pre_tasks:
-    - name: create the elastic user group
-      user:
-        name: "{{ elastic_group }}"
-        state: present
-
-    - name: create the elastic service user
-      user:
-        name: "{{ elastic_owner }}"
-        group: "{{ elastic_group }}"
-        state: present
-
-  tasks:
-  - name: add elasticsearch public signing key
-    apt_key:
-      url: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
-      state: present
-  
-  - name: add elasticsearch repo definition
-    apt_repository:
-      repo: "deb https://artifacts.elastic.co/packages/{{ elastic_pkg_folder }}/apt stable main"
-      update_cache: yes
-      state: present
-    
-  - name: install elasticsearch ELK components
-    apt:
-      name: "{{item.name}}={{item.version}}"
-      state: present
-    loop:
-      - {name: 'elasticsearch', version: '{{elastic_version}}' }
-      - {name: 'kibana', version: '{{elastic_version}}' }
-
-  - name: configure kibana server.host
-    lineinfile:
-      dest: /etc/kibana/kibana.yml
-      regexp: '^server.host:'
-      line: 'server.host: "0.0.0.0"'
-      state: present
-    notify:
-      - restart kibana     
-
-  - name: start earch of the component services 
-    service: 
-      name: "{{ item }}" 
-      enabled: yes 
-      state: started
-    loop:
-      - elasticsearch
-      - kibana 
-
-  handlers:
-  - name: restart kibana
-    service: name=kibana state=restarted
-
-  - name: restart elasticsearch
-    service: name=elasticsearch state=restarted  
-
-#  roles:
-#    - { role: elasticsearch }
-#    - { role: kibana }
-#    - { role: logstash }
-#    - { role: filebeat } 
-
-# kibana
-#localhost:5601/status
+    elastic_home: /apps/elastic
 ```
 
-Run playbook
+#### Exercise 3 - Tasks
 
-```console
-ansible-playbook -i dev01, -u vagrant lab4-answer.yml
-```
 
-### Reference
-https://www.digitalocean.com/community/tutorials/configuration-management-101-writing-ansible-playbooks
+
+
+See the complete playbook, [deploy-assets-manager.yml](../playbooks/deploy-assets-manager.yml)
+
