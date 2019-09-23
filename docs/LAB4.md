@@ -55,10 +55,126 @@ Append the variable section to the playbook (lab4.yml). These variables define t
     elastic_home: /apps/elastic
 ```
 
-#### Exercise 3 - Tasks
+#### Exercise 3 - Executing tasks with modules and debugging
+
+The goal of each task is to execute a **module**, with very specific arguments. Variables can be used in arguments to modules. Tasks are executed in order, one at a time, against all machines matched by the host pattern, before moving on to the next task. **pre_tasks** is a task which Ansible executes before executing any tasks mentioned in the playbook. 
+
+To print a message from Ansible playbook, as well as a value of a variable, you can use Ansible **debug** module.
+
+Within a task, you can use looping (**loop**), conditional (**when**), and **register** output to a variable.
+
+Open the *lab4.yml* and appending the following tasks.
 
 
+```
+  pre_tasks:
+    - name: create the elastic user group
+      user:
+        name: "{{ elastic_group }}"
+        state: present
 
+    - name: create the elastic service user
+      user:
+        name: "{{ elastic_owner }}"
+        group: "{{ elastic_group }}"
+        state: present
+
+  tasks:
+  - name: "check if the {{elastic_home}} directory exists"
+    stat:
+      path: "{{ elastic_home }}"
+    register: elastic_home_check
+
+  - name: print debug information
+    debug: 
+      var: elastic_home_check
+
+  - name: show conditional messages and facts (OS distribution)
+    debug:
+      msg: "{{ elastic_home }} does not existing. default location /var/lib/elasticsearch will be used ({{ ansible_distribution }})"
+    when: elastic_home_check.stat.exists == false   
+
+  - name: add elasticsearch public signing key
+    apt_key:
+      url: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
+      state: present
+  
+  - name: add elasticsearch repo definition
+    apt_repository:
+      repo: "deb https://artifacts.elastic.co/packages/{{ elastic_pkg_folder }}/apt stable main"
+      update_cache: yes
+      state: present
+
+  - name: install elasticsearch ELK components
+    apt:
+      name: "{{item.name}}={{item.version}}"
+      state: present
+    loop:
+      - {name: 'elasticsearch', version: '{{elastic_version}}' }
+      - {name: 'kibana', version: '{{elastic_version}}' }
+```
+
+#### Excercise 4 - Using Handler
+
+Handler are task that are defined inside or outside a play and can be called by the **notify** a state change during the task execution.
+
+
+Open the *lab4.yml* playbook file and append the following tasks to enable the Elasticsearch services to start, restart when the state change.
+
+```
+  - name: configure kibana server.host
+    lineinfile:
+      dest: /etc/kibana/kibana.yml
+      regexp: '^server.host:'
+      line: 'server.host: "0.0.0.0"'
+      state: present
+    notify:
+      - restart kibana     
+
+  - name: start earch of the component services 
+    service: 
+      name: "{{ item }}" 
+      enabled: yes 
+      state: started
+    loop:
+      - elasticsearch
+      - kibana 
+
+  handlers:
+  - name: restart kibana
+    service: name=kibana state=restarted
+
+  - name: restart elasticsearch
+    service: name=elasticsearch state=restarted 
+
+```
+
+#### Exercise 5 - Error handling
+
+When Ansible detect a error return from a task (command or module), it fails fast, forcing an error to be dealt with unless you decide otherwise. You can add one of the following error handling condition.
+
+```
+ignore_errors: yes | no
+failed_when: \<expression\>
+```
+
+Open the *lab4.yml* playbook and add the following error handling task.
+
+```
+  - name: Fail task when the command error output prints FAILED
+    command: /usr/bin/example-command -x -y -z
+    register: command_result
+    failed_when: "'FAILED' in command_result.stderr"
+```
 
 See the complete playbook, [deploy-assets-manager.yml](../playbooks/deploy-assets-manager.yml)
 
+Now we have the completed playbook, let's play it to install the ELK stack.
+
+```console
+$ ansible-playbook --limit runner<n>.lab.mpt.local -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu lab4.yml
+
+```
+
+---
+### End of LAB4
