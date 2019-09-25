@@ -2,18 +2,6 @@
 # The playbook to install and configure Elasticsearch ELK. This playbook work on Vagrant-VirtualBox 
 # environment as well.
 
-# This play is to install Python required for Ansible on Ubuntu OS only. 
-- hosts: all
-  become: true
-  gather_facts: false
-
-  pre_tasks:
-  - debug:
-    msg: 
-  - name: install Python on Ubuntu OS only
-    raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
-    when: 1==1
-
 # The play below are the tasks to install Elasticsearch ELK
 - hosts: all
   become: yes

@@ -1,0 +1,8 @@
+---
+# playbook to deploy myapache
+
+- hosts: all
+  become: true
+
+  roles:
+    - { role: myapache }

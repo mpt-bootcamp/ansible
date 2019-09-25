@@ -45,7 +45,7 @@ The *tree myapache* should show you the skeleton of the new role.
 At the myapache role directory, open the file, *tasks/main.yml*
 
 ```console
-$ cd ~/bootcamp/ansible/playbook/roles
+$ cd ~/bootcamp/ansible/playbooks/roles/myapache
 $ vi tasks/main.yml
 
 ```
@@ -64,7 +64,7 @@ Add the following lines to the file,
 
 - name: Enable Mod_Rewrite
   command: a2enmod rewrite
-  notiffy: restart apache
+  notify: restart apache
 
 ```
 
@@ -97,7 +97,7 @@ In the *playbooks* directory, create a playbook file, *deploy-myapache.yml*. Add
 Now run the playbook to deploy myapache on the managed node.
 
 ```console
-$ ansible-playbook -i "runner<n>.lab.mpt.local" -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu deploy-myapache.yml
+$ ansible-playbook -i "runner<n>.lab.mpt.local," -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu deploy-myapache.yml
 ```
 
 To confirm apache is installed, open the following URL.

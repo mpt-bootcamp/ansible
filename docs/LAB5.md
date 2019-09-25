@@ -24,21 +24,21 @@ runner<n>.lab.mpt.local
 
 ```console
 $ cd ~/bootcamp/ansible/playbooks
-$ ansible-playbook -i inventory/lab -u ubuntu $ --private-key=~/.ssh/id_rsa_ubuntu -v $ deploy-lamp.yml
+$ ansible-playbook -i inventories/lab -u ubuntu $ --private-key=~/.ssh/id_rsa_ubuntu -v $ deploy-lamp.yml
 ```
 
 ### Exercise 3 - Deploy a Java web application
 
 ```console
 $ cd ~/bootcamp/ansible/playbooks
-$ ansible-playbook -i inventory/lab -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu -v deploy-assets-manager.yml
+$ ansible-playbook -i inventories/lab -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu -v deploy-assets-manager.yml
 ```
 
 ### Exercise 4 (Optional) - Configure Elasticsearch and Kibana
 
 ```console
 $ cd ~/bootcamp/ansible/playbooks
-$ ansible-playbook -i inventory/lab -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu -v deploy-elastic-elk.yml
+$ ansible-playbook -i inventories/lab -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu -v deploy-elastic-elk.yml
 ```
 
 To checkout the configuration and application, open the following URLs:

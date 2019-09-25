@@ -85,15 +85,13 @@ $ ls -ltr
 $ ansible runner<n>.lab.mpt.local -m ping -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu
 
 # Use Ansible authorized_key module to copy the SSH public key to the remote host
-$ ansible runner<n> --become -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu -m authorized_key -a "user=$USER state=present key={{lookup('file', '~/.ssh/id_rsa.pub')}} manage_dir=yes"
-
-# Now test the ssh remote connection
-$ ssh $USER@runner<n>.lab.mpt.local
+$ ansible runner<n>.lab.mpt.local --become -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu -m authorized_key -a "user=$USER state=present key={{lookup('file', '~/.ssh/id_rsa.pub')}} manage_dir=yes"
 
 ```
 
 ### Exercise 5 - Login to the managed node using SSH connection
 
+Now test the SSH connection using the SSH key pair
 
 ```console
 $ ssh $USER@runner<n>.lab.mpt.local
