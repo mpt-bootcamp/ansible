@@ -1,5 +1,5 @@
 ---
-# This playbook is to setup a control machine
+# This playbook is to setup a control machine with Ansible and Jenkins
 
 # Ansible requires Python. Some Linux does not include Python by default. This step is not
 # needed if the VM provisioned with Python installed. 
@@ -12,7 +12,7 @@
     raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
     when: 1==1
 
-# Install console roles
+# Install the ansible and jenkins roles
 - hosts: all
   become: yes
   gather_facts: true
@@ -35,7 +35,6 @@
 
   roles:
     - { role: common }
-#   - { role: openjdk }    
     - { role: ansible }
     - { role: jenkins }
  

@@ -1,7 +1,6 @@
 ---
-# The playbook to install and configure Elasticsearch ELK
-# Kibana status check: 
-# http:<hostname>5601/status
+# The playbook to install and configure Elasticsearch ELK. This playbook work on Vagrant-VirtualBox 
+# environment as well.
 
 # This play is to install Python required for Ansible on Ubuntu OS only. 
 - hosts: all
@@ -98,11 +97,13 @@
   - name: restart elasticsearch
     service: name=elasticsearch state=restarted  
 
+# Placeholder for writing and using roles:
+
 #  roles:
 #    - { role: elasticsearch }
 #    - { role: kibana }
 #    - { role: logstash }
 #    - { role: filebeat } 
 
-# kibana
-#localhost:5601/status
+# kibana URL:
+# http://localhost:5601

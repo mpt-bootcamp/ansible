@@ -1,139 +1,190 @@
-## LAB2 - SSH Connection and Privilege Escalation
+## LAB2 - Writing a Playbook
 ---
+A playbook is a YAML file containing a series of tasks to automate the configuration of a server.
 
-### Goal
-In this lab, you will learn how Ansible communicates with managed nodes over SSH and how to use privilege escalation to execute administrative tasks.
+A task defines a single step that should be executed by Ansible. It typically involves the usage of a module or the execution of a command.
 
-### SSH Connection
-
-Ansible uses native OpenSSH for remote communication and SSH keys for authentication. Although password authentication is supported, it is not recommended for security best practice. When the control machine connects to the managed nodes, it first establishes an agreed encryption to protect the communication session. Then it authenticates the given user and verify whether access to the server should be granted. 
-
-When using SSH keys for authenticatin, Ansible uses the given user and private key in the command-line interface (CLI). The public key should be located in **~/.ssh/authorized_keys** on remote systems. The private key usually stores in the **~/.ssh** directory of the user home. Also, the user given is a ***sudo*** user, meaning it has the escalated privilege to execute administrative commands ( with the sudo prefix before the commands). For example,
-
-```console
-# Linux sudo command restart the Apache service
-sudo systemctl restart apapche2
-```
-
-If you don't specify the user and priviate key to use, Ansible assumes the current user (**$USER**) and private key (**~/.ssh/id_rsa**).
-
-You can also specify the user and private key to use in the inventory file. For instance
+### Task Format
 
 ```
-# /etc/ansible/hosts
-
-runner[1:20].lab.mpt.local ansible_user=ubuntu ansible_ssh_private_key_file=/home/ubunut/.ssh/id_rsa
-
+- name: A brief description of task
+  apt: name=unzip state=latest
 ```
 
-### Privilege Escalation
+The **name** part shows up in the output during the execution. The **apt** part, in this example, is a built-in Ansible module that abstracts the management of packages on Debian-based distributions to ensure the latest version of *unzip* tool is installed. 
 
-When executing configuration management tasks and command, it often requires to escalate the user priviliege to ***root*** or ***admin*** via **sudo**. You can tell Ansible to run privilege tasks by specifying the ***become*** and ***become_user*** parameters. If ***become-user*** is omitted, ***root*** is assumed. Also Ansible expects the user executing the privilege tasks is setup to use passwordless (NOPASS) in the ***/etc/sudoers*** file or ***/etc/sudoers.d/*** directory.
+### Playbook Format
 
-In a command-line interface,
-```
-ansible ... --become --become-user=root ... -m <module> -a <arguments>
-```
+Here is a simple playbook to install unzip. The **become** part tells Ansible to escalate the privilege as the *root* user. The **host** part let Ansible know to run on all managed nodes define in the inventory file (*/etc/ansible/hosts*).
 
-In a playbook,
 ```
-# Tell Ansible to become the root user to execute all host commands.
+---
 - hosts: all
-  become: yes
-  become_user: root
+  become: true
+
+  tasks:
+    - name: Update apt-cache 
+      apt: update_cache=yes
+
+    - name: Install unzip
+      apt: name=unzip state=latest
 ```
 
+#### Exercisie 1 - Create and execute a simple playbook.
 
-### Lab Exercises
-
-#### Exercise 1 - View the SSH configuration file
-
-From Terminal window of the Ansible control machine, run the following commands:
-```console
-# View the SSH server configuration file
-$ sudo cat /etc/ssh/sshd_config
-
-# View the SSH client configuration file
-$ sudo cat /etc/ssh/ssh_config
-
-# Check the SSH server authentication method
-$ sudo grep -i "PermitRootLogin\|PasswordAuthentication" /etc/ssh/sshd_config
-```
-
-Root and password login authentication should be disabled. 
-
-
-#### Exercise 2 - Check the supported encrypton cipher
+Create a *lab2a.yml* file and copy contents of the simple playbook above to the file.
 
 ```console
-# See SSH server supported encryption
-$ sudo sshd -T | grep "\(ciphers\|macs\|kexalgorithms\)" | perl -pe 's/,/\n/g' | sort -u
-
-# See SSH client supported encryption
-# ssh -Q cipher | cipher-auth | mac | kex | key
-$ ssh -Q cipher
-$ ssh -Q mac
-$ ssh -Q -kex
-
-# See supported encryption of the remote host
-$ ssh -vv runner<n>.lab.mpt.local
+$ cd ~/bootcamp/ansible/playbooks
+$ vi lab2.yml
 ```
 
-#### Exercise 3 - Generate SSH key pair
-```console 
-$ mkdir -p ~/.ssh
-$ cd ~/.ssh
-$ ssh-keygen -t rsa -b 2048 -C "$USER" -N "" -f id_rsa
-$ ls -ltr 
-```
-
-#### Exercise 4 - Copy the public to the remote host
-```console
-# Ping the if the remote host is reachable by Ansible
-$ ansible runner1.lab.mpt.local -m ping -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu
-
-# Use Ansible authorized_key module to copy the SSH public key to the remote host
-$ ansible dev01 --become -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu -m authorized_key -a "user=$USER state=present key={{lookup('file', '~/.ssh/id_rsa.pub')}} manage_dir=yes"
-
-# Now test the ssh remote connection
-$ ssh $USER@runner<n>.lab.mpt.local
-
-```
-
-#### Exercise 5 - Configure Linux Sudoers File
-
-The sudoers file is a file use to allocate system rights to system users. This allows the administrator to control who does what. 
+Next, execute the playbook.
 
 ```console
-# Check the sudoers files
-$ sudo ls -ltr /etc/sudoers*
-$ sudo cat /etc/sudoers
-$ sudo cat /etc/sudoers.d/<file>
-
-# Check user groups
-$ groups
-$ sudo groups $USER
+$ ansible-playbook lab2a.yml
 ```
 
-To enable passwordless sudo command, you create a file in /etc/sudoers.d/$USERS.
+#### Excercise 2 - Working with Variables
+
+You can variables in a playbook with the **vars** keyword. Let change the simple playbook a the *package* variable. To access the value of a variable, enclose the variable name inside the double bracket **{{** *variable* **}}**.
+
+Create a new playbook file, *lab2b.yml* and paste the contents below to the file.
 
 ```
-$USERS ALL=(ALL) NOPASSWD:ALL
-```
-For example,
+---
+- hosts: all
+  become: true
+
+  vars:
+    package: unzip
+    
+  tasks:
+    - name: Update apt-cache 
+      apt: update_cache=yes
+
+    - name: Install unzip
+      apt: name={{ package }} state=latest
 
 ```
-$ sudo ls -ltr /etc/sudoers.d/ubuntu
--r--r----- 1 root root  31 Feb 21  2019 ubuntu
 
-$ sudo cat /etc/sudoers.d/ubuntu
-ubuntu ALL=(ALL) NOPASSWD:ALL
+Run the playbook. You should see it runs but no change because it is already installed. It is the same as lab2a except the installing package represent as a variable instead a literal value. 
 
+```console
+$ ansible-playbook lab2b.yml
 ```
 
-**Note**, make you have the correct syntax and file permission. Otherwise you may disable all sudoers and requires recovering or reinstalling the operating system.
+#### Exercise 3 - Using Loops
+
+Loops are typically used to repeat a task using different input values. In this exercise, we will loop over a list of packages to install.
+
+Create a playbook file, lab3a.yml, and copy the following contents to it. Here we will install 3 packages - unzip, tree, and ntp.
+
+```
+---
+- hosts: all
+  become: true
+
+  tasks:
+    - name: Update apt-cache 
+      apt: update_cache=yes
+
+    - name: Install unzip
+      apt: name={{ item }} state=latest
+      loop:
+        - unzip
+        - tree
+        - ntp
+```
+
+Now, run the playbook see how it works.
+
+```console
+$ ansible-playbook lab2b.yml
+```
+
+You can also repreent the list of packages in a variable like below:
+
+```
+---
+- hosts: all
+  become: true
+
+  vars:
+    packages: ['unzip', 'npt', 'tree']
+
+  tasks:
+    - name: Update apt-cache 
+      apt: update_cache=yes
+
+    - name: Install unzip
+      apt: name={{ item }} state=latest
+      loop: "{{ packages }}"
+```
+
+**Note** that the *packages* variable is enclosed in double qoute. Otherwise, you will get an error when running the playbook. Ansible requires variable to enclose in quote if there is no other character(s) proceeding the variable.
+
+#### Exercise 4 - Using Conditionals and Debugging
+
+Conditionals can be used to decide whether or not a task should be executed, based on a variable or an output (registered variable) from a command.
+
+In this exercise, we will create the playbook to check if PHP is installed and use the **debug** module to print the message and show the *register variable* of an output.
+
+Create and copy the contents below to a new playbook file, *lab4.yml* 
+
+```
+---
+- hosts: all
+  become: true
+
+  tasks:
+    - name: Check if PHP is installed
+      register: php_installed
+      command: php -v
+      ignore_errors: true
+
+    - name: This task is only executed if PHP is installed
+      debug: var=php_install
+      when: php_installed | success
+
+    - name: This task is only executed if PHP is NOT installed
+      debug: msg='PHP is NOT installed'
+      when: php_installed | failed
+```
+
+#### Exercise 5 - Defining and Triggering Handler
+
+A handlers is used to trigger a state change in a service, such as a restart or a stop. It is only executed when a notify directive is called in a task. 
+
+In this exercise, we will create a playbook to install Apache2 and see how to use a restart handler after enabling the Mod_Rewrite.
+
+Create a playbook file, *lab5.yml*, with the following lines.
+
+```
+---
+- hosts: all
+  become: true
+
+  tasks:
+    - name: Update apt-cache 
+       apt: update_cache=yes
+
+    - name: Install apache2
+      apt: name=apache2 state=present
+
+    - name: Enable Mod_Rewrite
+      command: a2enmod rewrite
+      notiffy: restart apache
+    
+  handlers:
+    - name: restart apache
+      service: name=apache2 state=restarted  
+    
+```
+
+
+
 
 
 ---
-### End of LAB2
-
+## LAB2 - End

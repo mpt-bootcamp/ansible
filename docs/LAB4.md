@@ -1,180 +1,108 @@
-## LAB4 - Playbooks
+## LAB4 - Roles
+---
 
-### Goal
-In this lab, you will learn the Ansible playbook structure by writing a playbook to install Elasticsearch ELK 
+The concept of an Ansible role is a group of variables, tasks, files, and handlers that are stored in a standardized file structure.
 
-#### Playbook Format
+You use ansible-galaxy init <ROLE_NAME> to create a new role skeleton in the ***roles*** directory. 
 
-Playbooks are YAML files containing a series of directives to provision and bring a system to a desired state. When writing in YAML, you need to be extra careful to maintain the correct indentation and use ***space*** instead of  ***tab***
+### Exercise 1 - Create an Apache role
 
-Below is a simple playbook to install unzip and tree command tools.
+In Lab2 exercise 5, we created a playbook to install Apache.
+
 
 ```
 ---
 - hosts: all
   become: true
-  tasks:
-  - name: install unzip 
-    apt: 
-      update_cache: yes
-      name: {{item}}
-    loop:
-      - unzip
-      - tree
-```
-
-
-### Lab Exercises
-
-#### Exercise 1 - Create a playbook boilerplate
-
-In the playbooks directory of the ansible project, `~/bootcamp/ansible/playbooks, create the playbook file, ***lab4.yml***, and add the following lines.
-
-```
----
-# The playbook to install and configure Elasticsearch ELK
-# http:<hostname>5601
-
-# The play below are the tasks to install Elasticsearch ELK
-- hosts: all
-  become: yes
-  gather_facts: true
-```
-
-#### Exercise 2 - Working with variables
-
-Variables give you more flexibility in writing playbooks and roles. They can be used to loop through a set of given values, access various information like the hostname of a system and replace certain strings in templates by with specific values. They are referenced via curly brackets **{{ }}**.
-
-Append the variable section to the playbook (lab4.yml). These variables define the version and attributes to install Elasticsearch.
-```
-  vars:
-    elastic_owner: elastic
-    elastic_group: elastic
-    elastic_version: 7.3.2
-    elastic_pkg_folder: 7.x
-    elastic_home: /apps/elastic
-```
-
-#### Exercise 3 - Executing tasks with modules and debugging
-
-The goal of each task is to execute a **module**, with very specific arguments. Variables can be used in arguments to modules. Tasks are executed in order, one at a time, against all machines matched by the host pattern, before moving on to the next task. **pre_tasks** is a task which Ansible executes before executing any tasks mentioned in the playbook. 
-
-To print a message from Ansible playbook, as well as a value of a variable, you can use Ansible **debug** module.
-
-Within a task, you can use looping (**loop**), conditional (**when**), and **register** output to a variable.
-
-Open the *lab4.yml* and appending the following tasks.
-
-
-```
-  pre_tasks:
-    - name: create the elastic user group
-      user:
-        name: "{{ elastic_group }}"
-        state: present
-
-    - name: create the elastic service user
-      user:
-        name: "{{ elastic_owner }}"
-        group: "{{ elastic_group }}"
-        state: present
 
   tasks:
-  - name: "check if the {{elastic_home}} directory exists"
-    stat:
-      path: "{{ elastic_home }}"
-    register: elastic_home_check
+    - name: Update apt-cache 
+       apt: update_cache=yes
 
-  - name: print debug information
-    debug: 
-      var: elastic_home_check
+    - name: Install apache2
+      apt: name=apache2 state=present
 
-  - name: show conditional messages and facts (OS distribution)
-    debug:
-      msg: "{{ elastic_home }} does not existing. default location /var/lib/elasticsearch will be used ({{ ansible_distribution }})"
-    when: elastic_home_check.stat.exists == false   
-
-  - name: add elasticsearch public signing key
-    apt_key:
-      url: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
-      state: present
-  
-  - name: add elasticsearch repo definition
-    apt_repository:
-      repo: "deb https://artifacts.elastic.co/packages/{{ elastic_pkg_folder }}/apt stable main"
-      update_cache: yes
-      state: present
-
-  - name: install elasticsearch ELK components
-    apt:
-      name: "{{item.name}}={{item.version}}"
-      state: present
-    loop:
-      - {name: 'elasticsearch', version: '{{elastic_version}}' }
-      - {name: 'kibana', version: '{{elastic_version}}' }
-```
-
-#### Excercise 4 - Using Handler
-
-Handler are task that are defined inside or outside a play and can be called by the **notify** a state change during the task execution.
-
-
-Open the *lab4.yml* playbook file and append the following tasks to enable the Elasticsearch services to start, restart when the state change.
-
-```
-  - name: configure kibana server.host
-    lineinfile:
-      dest: /etc/kibana/kibana.yml
-      regexp: '^server.host:'
-      line: 'server.host: "0.0.0.0"'
-      state: present
-    notify:
-      - restart kibana     
-
-  - name: start earch of the component services 
-    service: 
-      name: "{{ item }}" 
-      enabled: yes 
-      state: started
-    loop:
-      - elasticsearch
-      - kibana 
-
+    - name: Enable Mod_Rewrite
+      command: a2enmod rewrite
+      notiffy: restart apache
+    
   handlers:
-  - name: restart kibana
-    service: name=kibana state=restarted
-
-  - name: restart elasticsearch
-    service: name=elasticsearch state=restarted 
-
+    - name: restart apache
+      service: name=apache2 state=restarted  
+    
 ```
 
-#### Exercise 5 - Error handling
-
-When Ansible detect a error return from a task (command or module), it fails fast, forcing an error to be dealt with unless you decide otherwise. You can add one of the following error handling condition.
-
-```
-ignore_errors: yes | no
-failed_when: \<expression\>
-```
-
-Open the *lab4.yml* playbook and add the following error handling task.
-
-```
-  - name: Fail task when the command error output prints FAILED
-    command: /usr/bin/example-command -x -y -z
-    register: command_result
-    failed_when: "'FAILED' in command_result.stderr"
-```
-
-See the complete playbook, [deploy-assets-manager.yml](../playbooks/deploy-assets-manager.yml)
-
-Now we have the completed playbook, let's play it to install the ELK stack.
+Let's now convert the playbook to a role. From your control machine,
 
 ```console
-$ ansible-playbook --limit runner<n>.lab.mpt.local -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu lab4.yml
+$ cd ~/bootcamp/ansible/playbooks/roles
+$ ansible-galaxy init myapache
+$ tree myapache
+```
+
+The *tree myapache* should show you the skeleton of the new role.
+
+At the myapache role directory, open the file, *tasks/main.yml*
+
+```console
+$ cd ~/bootcamp/ansible/playbook/roles
+$ vi tasks/main.yml
 
 ```
 
+Add the following lines to the file,
+
+```
 ---
-### End of LAB4
+# tasks file for myapache
+
+- name: Update apt-cache 
+  apt: update_cache=yes
+
+- name: Install apache2
+  apt: name=apache2 state=present
+
+- name: Enable Mod_Rewrite
+  command: a2enmod rewrite
+  notiffy: restart apache
+
+```
+
+Now open the the file, *handlers/main.yml*, to add the restart handler.
+
+```
+# handlers file for myapache
+
+- name: restart apache
+  service: name=apache2 state=restarted  
+
+```
+
+### Exercise 2 - Calling the role in a playbook
+
+In the *playbooks* directory, create a playbook file, *deploy-myapache.yml*. Add the following lines
+
+```
+---
+# playbook to deploy myapache
+
+- hosts: all
+  become: true
+
+  roles:
+    - { role: myapache }
+
+```
+
+Now run the playbook to deploy myapache on the managed node.
+
+```console
+$ ansible-playbook -i "runner<n>.lab.mpt.local" -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu deploy-myapache.yml
+```
+
+To confirm apache is installed, open the following URL.
+
+http://runner\<n\>.missionpeaktechnologies.com
+
+---
+### LAB4 - End

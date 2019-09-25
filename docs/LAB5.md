@@ -1,57 +1,53 @@
-## LAB5 - Application Deployment
+## LAB5 - Configuration and Deployment
 
-### Goal
-In this lab, you will learn how to use Ansible playbook and roles to deploy an application. Roles provide a way for grouping collections of variables, tasks, files, templates, and modules so it can be reused.
+In this last lab, we will run the playbooks to configure a popular LAMP stack, deploy a Java web application. If time permitted, we will also configure a system to run the Elasticsearch and Kibana.
 
-### Basic Deployment Steps
-
-1. Identify the target environment and nodes
-2. Download the application package
-3. Unpackage and setup the application configuration properties
-4. Setup the application to run as a service
-5. Start the application
+At the control machine, go to playbooks directory of the ansible project.
 
 
-### Lab Exercises
-
-#### Exercise 1 - Download the deployment playbook
-
-Login in to the Ansible control machine.
+### Exercise 1 - Setup the inventory file for the lab environment
 
 ```console
-mkdir -p ~/bootcamp
-cd ~/bootcamp
-git clone https://github.com/mpt-bootcamp/ansible.git
+$ cd ~/bootcamp/ansible/playbooks
+$ mkdir -p inventories/lab
+$ vi inventories/lab/hosts
 ```
 
-#### Exercise 2 - Setup the inventory file for the lab environment
+Add or paste the following lines.
 
-```console
-cd ~/bootcamp/ansible/playbooks
-mkdir -p inventories/lab
-vi inventories/lab/hosts
-```
-Add or paste the following lines, exit and save (ESC :wq)
 ```
 [web]
-runner1.lab.mpt.local
+runner<n>.lab.mpt.local
 ```
 
-#### Exercise 3 - Run the application deployment playbookto the ***lab*** environment
-
-From the Ansible control machine,
+### Exercise 2 - Configuring a LAMP stack
 
 ```console
-cd ~/bootcamp/ansible/playbooks
-ansible-playbook -i inventory/lab -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu -v deploy-assets-manager.yml
+$ cd ~/bootcamp/ansible/playbooks
+$ ansible-playbook -i inventory/lab -u ubuntu $ --private-key=~/.ssh/id_rsa_ubuntu -v $ deploy-lamp.yml
 ```
 
-#### Exercise 4 - Review the playbook and role
+### Exercise 3 - Deploy a Java web application
 
-You can use the Jupyter web editor, or vi from the Terminal window to view the following files:
+```console
+$ cd ~/bootcamp/ansible/playbooks
+$ ansible-playbook -i inventory/lab -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu -v deploy-assets-manager.yml
+```
 
-* deploy-assets-manager.yml
-* roles/assets-manager/*
+### Exercise 4 (Optional) - Configure Elasticsearch and Kibana
+
+```console
+$ cd ~/bootcamp/ansible/playbooks
+$ ansible-playbook -i inventory/lab -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu -v deploy-elastic-elk.yml
+```
+
+To checkout the configuration and application, open the following URLs:
+
+```
+http:runner<n>.missionpeaktechnologies.com
+http:runner<n>.missionpeaktechnologies.com:9000
+http:runner<n>.missionpeaktechnologies.com:5601
+```
 
 ---
 ### End of LAB5

@@ -1,5 +1,5 @@
 ---
-# This playbook is to install the assets manager web application
+# This playbook is to install the assets manager web application.
 
 # Ansible requires Python. Some Linux does not include Python by default. This step is not
 # needed if the VM provisioned with Python installed. 

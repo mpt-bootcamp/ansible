@@ -1,34 +1,30 @@
-## LAB1 - Ansible Control Machine and Managed Nodes
+## LAB1 - Getting Started
 ---
 
-### Goal
-In this lab, you will learn the basic concepts of Ansible.
+Ansible is widely used to automate the configuration of a wide range of systems and devices such as virtual machines, databases, storage devices, networks, firewalls, etc. Generally, you can use Ansible to automate two types of tasks:
 
-### Basic Concepts
-A control machine is any computer or virtual machine where Ansible is installed to run commands and playbooks.
+1. Configuration management - Change the configuration of an application, OS, or device; start and stop services; install or update applications; implement a security policy.
+2. Application deployment- Make DevOps easier by automating the build and deployment of your applications.
 
-Managed nodes are machines or hosts that the control macnine connect to and to make configuration changes or to install software.
+### Exercise 1 - Connecting to the Lab Environment
 
-Inventory is a file (/etc/ansible/hosts) listing or grouping one or more managed nodes or hosts.
+For the lab exercises, we will be connecting to an Ansible control machine (EC2 intance) in AWS. Each student is assigned with a student number (1 to 20). You will need to replace the **\<n\>** with the assigned number in the lab instructions.
 
-Configuration file (ansible.cfg) let you specify or change the default Ansible settings and behaviors. 
 
-Playbooks are files that you define the configurations and tasks to play in the managed hosts.
+To connect to the control machine, 
 
-Ansible works by connecting to the managed nodes from a control machine, and pushing out small programs, called "modules" defined in the playbook to them. Ansible then executes these modules over SSH by default, and removes them when finished. While passwords are supported, but SSH keys are the preferred and secured way to use Ansible.
+1) Open the URL with a browser (Chrome or Firefox).
 
-### Lab Exercises
-
-#### Exercise 1 - Login to an EC2 control machine using a Web terminal (Jupyter)
-
-1. Open the URL with Chrome or any browser. Where \<n\> is your student number.
 ```
 http://console<n>.missionpeaktechnologies.com:8000/
 ```
-2. Enter student\<n\>/student\<n\> for the username and passowrd. For example, student1/student1
-3. Next click the "Terminal" icon to open a web terminal session
+2) Enter student\<n\>/student\<n\> for the username and passowrd. For example, student1/student1
+3) After login, click the "Terminal" icon to open a web terminal session
+
 ![Custom Apache Home Page](images/console-home.png)
-4. Enter the following command to verified the installted Python and version
+
+4) Enter the following commands to verified Ansible and required packages are installed
+
 ```console
 $ cd ~/
 $ pwd
@@ -41,51 +37,99 @@ $ ansible --version
 
 ````
 
-#### Exercise 2 - Create a default configuration file
-
-Depending on how Ansible is installed, the following default inventory and configuration may have created for you.
-
-> /etc/ansible/ansible.cfg
-> /etc/ansible/hosts
+With the Jupyter web terminal, you can also the **Text File** and the **Markdown File** editors to create or view files. Click the four icons on the left of the navigation panel to open the File, Terminal, Help, and Laucher explorer or viewer.
 
 
-If the two files are not created, you can use the following steps to create them. Enter your student password if prompts when using escalated admin privilege.
+### Exercise 2 - Using Ansible CLI
+
+Now you are able to connect to the control machine via the Jupyter web terminal, let's learn how to use the Ansible command-line interface (CLI). The **ansible** CLI command is commonly used to execute some simple built-in modules.
+
+1) Run the **ping** module to check a remote host is reachable.
+
+```consle
+$ ansible all -i "runner<n>.lab.mpt.local," -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu -m ping
+
+```
+
+Here *-i "runner<n>/lab.mpt.local,"* is used to specify the dynamic host, host is not define in the inventory file. The *-u ubuntu --private-key=~/.ssh/id_rsa_ubuntu* tells Ansible to use the escalated privilege account *ubuntu* and use the private key for connection authentication.
+
+2) Run the **setup** module to gather the system information (Ansible facts).
+
 
 ```console
-# Create the configuration file
-$ sudo mkdir -p ~/etc/ansible
-$ sudo vi /etc/ansible/ansible.cfg
+$ ansible all -i "runner<n>.lab.mpt.local," -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu -m setup
 
 ```
 
-For example,
-```
-[defaults]
- 
-host_key_checking=False
-retry_files_enabled=False
- 
-#stdout_callback = yaml
-#bin_ansible_callbacks = True`
+3) To learn all the command option, type
+
+```consoel
+$ ansible --help
 ```
 
-#### Exercise 3 - Create a default inventory file
+
+### Exercise 3 - Setting the Default Inventory File
+
+The inventory file can list individual hosts or user-defined groups of hosts. The default location for the inventory file is ***/etc/ansible/hosts***.
+
+1) Open or create the default inventory file to add a managed node and a database node in the *db* group
 
 ```console
-# Create the inventory file
-sudo mkdir -p ~/etc/ansible
-sudo vi /etc/ansible/hosts
+$ sudo vi /etc/ansible/hosts
 ```
 
-For instance,
-```
-runner[1:20].missionpeaktechnologies.com        
+Add or append the following lines to the host file, */etc/ansible/hosts*.
 
 ```
+runner<n>.lab.mpt.local
 
-#### Exercise 4 - Copy the Ansible sudo user (ubuntu) SSH key
+[db]
+runner20.lab.mpt.local
 
-After creating a new machine or virtual machine, it is the best practice to harden the system security by disabling user/password login and enabling login using SSH key only. To use Ansible, we either need to generate a SSH key pair (private and public), or use an existing key pair with an administor user account. In this exercise, we will use the existing SSH key associated with the ubuntu user (for the Ubuntu OS). We will cover more detail in [LAB2 - SSH Connection and Privilege Escalation](LAB2.md)
+```
+
+Note to replace \<n\> with your student number. Here we also designate *runner20.lab.mpt.local* as a share database host under the *db* group. *lab.mpt.loca* is just a local acessible domain name.
+
+
+2) With the managed node added to the inventory file, you can run the ansible command by providing the *host* or *group* name.
+
+To ping a specific host in the inventory file
+
+```console
+$ ansible runner<n>.lab.mpt.local -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu -m ping
+```
+
+To ping all hosts in the inventory file,
+
+```console
+$ ansible all -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu -m ping
+```
+
+Note the ***all*** after the **ansible** command.
+
+
+### Exercise 4 - Clone the Ansible Project from GitHub
+
+Let's download (clone) the Ansible project before we continue the rest of the labs.
+
+From your Ansible control machine,
+
+```console
+$ mkdir -p ~/bootcamp
+$ cd ~/bootcamp
+$ git clone https://github.com/mpt-bootcamp/ansible.git
+```
+
+To brow the directory structure, you can run the Linux command tree.
+
+```console
+$ cd ~/bootcamp/ansible
+$ tree
+```
+
+### Exercise 5 - Copy the Ansible sudo user (ubuntu) SSH key
+
+At the control machine,
 
 ```console
 $ mkdir -p ~/.ssh
@@ -102,62 +146,6 @@ student1@console1:~$ ls -la ~/.ssh
 drwxrwxr-x 2 student1 student1 4096 Sep 16 03:01 .
 drwxr-xr-x 5 student1 student1 4096 Sep 16 03:57 ..
 -rw------- 1 student1 student1 1675 Sep 16 03:01 id_rsa_ubuntu
-```
-
-#### Exercise 5 - Verify Ansible is ready to use
-
-To verify Ansible is installed, configured, and ready to use, enter the following commands in the Terminal window. 
-
-```console
-$ cd ~/
-$ which ansible
-$ ansible --version
-$ ansible all -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu -m ping
-```
-
-The output should look something like
-
-```
-/usr/local/bin/ansible
-
-ansible 2.5.1
-  config file = /etc/ansible/ansible.cfg
-  configured module search path = [u'/home/student1/.ansible/plugins/modules', u'/usr/share/ansible/plugins/modules']
-  ansible python module location = /usr/local/lib/python2.7/dist-packages/ansible
-  executable location = /usr/local/bin/ansible
-  python version = 2.7.12 (default, Aug 22 2019, 16:36:40) [GCC 5.4.0 20160609]
-
-runner1.lab.mpt.local | SUCCESS => {
-    "changed": false,
-    "ping": "pong"
-}  
-```
-
-#### Exercise 6 - Run a playbook to install and configure a LAMP stack
-
-With Ansible is ready to use, let's see how we can use it to install Apache, MySQL and PHP on a Linux machine (LAMP). Open a Terminal window and enter the following commands
-
-```console
-$ mkdir -p ~/bootcamp
-$ cd ~/bootcamp
-$ git clone https://github.com/mpt-bootcamp/ansible.git
-$ cd ~/bootcamp/ansible/playbooks
-$ ls -l *.yml
-$ ansible-playbook --limit runner<n>.lab.mpt.local -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu deploy-lamp.yml
-
-```
-
-To verify the LAMP stack is correctly installed and configured by Ansible, open the following URL with Chrome or any web browser.
-
-> http://runner\<n\>.missionpeaktechnologies.com/
-
-Note, you need to replace \<n\> with your student number. For example,
-
-> http://runner1.missionpeaktechnologies.com/
-
-
-![Custom Apache Home Page](images/lamp-home.png)
-
 
 ---
-### End of LAB1
+## LAB1 - End

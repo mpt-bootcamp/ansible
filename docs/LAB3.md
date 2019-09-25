@@ -1,110 +1,104 @@
-## LAB3 - Inventory File and Command-line Interface (CLI)
-
-### Goal
-In this lab, you will learn how to use inventory file and group variables upon commands, modules and tasks in a playbook operate.
-
-### Hosts, groups and variables 
-
-The inventory file can list individual hosts or user-defined groups of hosts. it can be written in one of many formats - INI, YAML, or JSON. The default location for the inventory file is ***/etc/ansible/hosts***. You can also create project-specific inventory files in alternate locations. For example,
-
-```
-ansible/playbooks/inventories/
-├── dev
-│   ├── group_vars
-│   │   └── all
-│   └── hosts
-└── local
-    ├── group_vars
-    └── hosts
-```
-
-You can use multiple inventory files at the same time and pull inventory from dynamic or cloud sources or different formats (YAML, INI, JSON). Ansible combines all of them and run Ansible plays/tasks against those hosts. The ***group_vars/all*** file is used to set variables that will be used for every host that Ansible is ran against.
-
-You can pass the inventory file to Ansible using the ***-i*** or ***--inventory-file*** option followed by the path to the file. If you do not explicitly specify any inventory file to Ansible, it will take the default path from the ***host_file*** parameter of ***ansible.cfg***, which defaults to ***/etc/ansible/hosts***.
-
-If you want to run your Ansible tasks against all of these hosts, then you can pass ***all*** to the hosts parameter while running the ansible-playbook or to the ansible command, or you can limit to the specific hosts with the ***--limit*** option for the the ansible-playbook command.
-
-
-### Lab Exercises
-
-For lab execerises, we will be using the existing *ansible* project.
-
-```console
-# Go to the playbooks directory
-$ cd ~/bootcamp/ansible/playbooks
-$ pwd
-```
-
-#### Exercise 1 - Create a local inventory file for the lab environment
-
-```console
-# Create the enviornment and group variables folder
-$ mkdir -p inventories/lab/group_vars
-````
-
-Create the inventory file with the following contents (vi inventories/lab/hosts). Make sure you replace \<n\> with assigned student number(1-18).
-
-**INI version - hosts**
-
-```
-[web]
-runner<n>.lab.mpt.local
-
-[db]
-runner19.lab.mpt.local
-
-[monitor]
-runner20.lab.mpt.local
-
-```
-
-**YAML version - hosts.yml**
-```
-all:
-  hosts:
-    runner<n>.lab.mpt.local:
-  children:
-    web:
-      hosts:
-        runner19.lab.mpt.local:
-    db:
-      hosts:
-        runner20.lab.mpt.local
-```
-
-Next create a group variables file for all hosts (vi inventories/lab/group_vars/all) with the following contents.
-
-```
+## LAB3 - SSH Basic and Privilege Escalation
 ---
-env_name: lab
-env_description: Lab environment 
 
-```
+### SSH Basic
 
-#### Exercise 2 - Running Ansible commands with the inventory file
+Ansible uses native OpenSSH for remote communication and SSH keys for authentication. Although password authentication is supported, it is not recommended for security best practice. When the control machine connects to the managed nodes, it first establishes an agreed encryption to protect the communication session. Then it authenticates the given user and verify whether access to the server should be granted. 
 
-```console
-# Ping all hosts in the default inventory file /etc/ansible/hosts
-$ ansible all -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu -m ping
+When using SSH keys for authenticatin, Ansible uses the given user and private key in the command-line interface (CLI). The public key should be located in **~/.ssh/authorized_keys** on remote systems. The private key usually stores in the **~/.ssh** directory of the user home. Also, the user given is a ***sudoer*** user, meaning it has the escalated privilege to execute administrative commands ( with the sudo prefix before the commands). For example,
 
-# Ping all hosts in the lab environment
-$ ansible all -i inventories/lab -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu -m ping
-
-# Get the host facts for the web group
-$ ansible web -i inventories/lab -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu -m setup
-```
-
-#### Exercise 3 - Running Ansible commands with dynamic hosts
-
-You can run commands against hosts that are not defined in the inventory file by listing the hosts
 
 ```console
-ansible ops01 -i "console18.lab.mpt.local, console20.lab.mpt.local,"  -m ping -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu
+# Linux sudo command restart the Apache service
+$ sudo systemctl restart apapche2
 ```
 
-#### Exercise 4 - Running command without valid authentication
-```console
-$ ansible all -m ping
-$ ansible all -u student<n> -m ping
-$ ansible all -u ubuntu -m ping
+If you don't specify the user and priviate key to use, Ansible assumes the current user (**$USER**) and private key (**~/.ssh/id_rsa**).
+
+
+### Privilege Escalation
+
+When executing configuration tasks, it often requires to escalate the user priviliege to ***root*** or ***admin*** via **sudo**. You can tell Ansible to run privilege tasks by specifying the ***become*** and ***become_user*** parameters. If ***become-user*** is omitted, ***root*** is assumed. Also Ansible expects the user executing the privilege tasks is setup to use passwordless (NOPASS) in the ***/etc/sudoers*** file or ***/etc/sudoers.d/*** directory. For example,
+
+In the comand-line,
+
 ```
+$ ansible ... --become --become-user=root ... -m <module> -a <arguments>
+```
+
+In a playbook,
+```
+# Tell Ansible to become the root user to execute all host commands.
+- hosts: all
+  become: yes
+  become_user: root
+```
+
+
+### Exercise 1 - View the SSH configuration file
+
+From Terminal window of the Ansible control machine, run the following commands:
+
+```console
+# View the SSH server configuration file
+$ sudo cat /etc/ssh/sshd_config
+
+# View the SSH client configuration file
+$ sudo cat /etc/ssh/ssh_config
+
+# Check the SSH server authentication method
+$ sudo grep -i "PermitRootLogin\|PasswordAuthentication" /etc/ssh/sshd_config
+```
+
+The output should show the toot and password login authentication are disabled. 
+
+
+### Exercise 2 - Check the supported encrypton cipher
+
+```console
+# See SSH server supported encryption
+$ sudo sshd -T | grep "\(ciphers\|macs\|kexalgorithms\)" | perl -pe 's/,/\n/g' | sort -u
+
+# See SSH client supported encryption
+# ssh -Q cipher | cipher-auth | mac | kex | key
+$ ssh -Q cipher
+$ ssh -Q mac
+$ ssh -Q -kex
+
+# See supported encryption of the remote host
+$ ssh -vv runner<n>.lab.mpt.local
+```
+
+### Exercise 3 - Generate SSH key pair
+
+```console 
+$ mkdir -p ~/.ssh
+$ cd ~/.ssh
+$ ssh-keygen -t rsa -b 2048 -C "$USER" -N "" -f id_rsa
+$ ls -ltr 
+```
+
+### Exercise 4 - Copy the public to the managed node using Ansible CLI
+
+```console
+# Ping the if the remote host is reachable by Ansible
+$ ansible runner<n>.lab.mpt.local -m ping -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu
+
+# Use Ansible authorized_key module to copy the SSH public key to the remote host
+$ ansible runner<n> --become -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu -m authorized_key -a "user=$USER state=present key={{lookup('file', '~/.ssh/id_rsa.pub')}} manage_dir=yes"
+
+# Now test the ssh remote connection
+$ ssh $USER@runner<n>.lab.mpt.local
+
+```
+
+### Exercise 5 - Login to the managed node using SSH connection
+
+
+```console
+$ ssh $USER@runner<n>.lab.mpt.local
+```
+
+---
+## LAB3 - End
+

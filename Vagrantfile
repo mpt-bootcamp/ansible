@@ -88,7 +88,7 @@ Vagrant.configure("2") do |config|
     #  path: "scripts/install-ansible-debian.sh"      
     
     ops01.vm.provision "ansible" do |ansible|
-      ansible.playbook = "playbooks/deploy-ansible.yml"
+      ansible.playbook = "playbooks/deploy-ansible-jenkins.yml"
     # ansible.playbook = "playbooks/deploy-lamp.yml"
     end    
 
