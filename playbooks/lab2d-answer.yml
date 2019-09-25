@@ -1,0 +1,17 @@
+---
+- hosts: all
+  become: true
+
+  tasks:
+    - name: Check if PHP is installed
+      register: php_installed
+      command: php -v
+      ignore_errors: true
+
+    - name: This task is only executed if PHP is installed
+      debug: var=php_install
+      when: php_installed | success
+
+    - name: This task is only executed if PHP is NOT installed
+      debug: msg='PHP is NOT installed'
+      when: php_installed | failed

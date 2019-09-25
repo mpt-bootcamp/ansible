@@ -1,0 +1,13 @@
+---
+- hosts: all
+  become: true
+
+  vars:
+    package: unzip
+    
+  tasks:
+    - name: Update apt-cache 
+      apt: update_cache=yes
+
+    - name: Install unzip
+      apt: name={{ package }} state=latest

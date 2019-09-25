@@ -37,6 +37,25 @@ $ ansible --version
 
 ````
 
+5) Copy the Ansible sudo user (ubuntu) SSH key
+
+```console
+$ mkdir -p ~/.ssh
+$ sudo cp /home/ubuntu/.ssh/id_rsa ~/.ssh/id_rsa_ubuntu
+$ sudo chown $USER: ~/.ssh/id_rsa_ubuntu
+$ ls -ltr ~/.ssh
+
+```
+
+You should see something like below.
+
+```
+student1@console1:~$ ls -la ~/.ssh
+drwxrwxr-x 2 student1 student1 4096 Sep 16 03:01 .
+drwxr-xr-x 5 student1 student1 4096 Sep 16 03:57 ..
+-rw------- 1 student1 student1 1675 Sep 16 03:01 id_rsa_ubuntu
+```
+
 With the Jupyter web terminal, you can also the **Text File** and the **Markdown File** editors to create or view files. Click the four icons on the left of the navigation panel to open the File, Terminal, Help, and Laucher explorer or viewer.
 
 
@@ -46,7 +65,7 @@ Now you are able to connect to the control machine via the Jupyter web terminal,
 
 1) Run the **ping** module to check a remote host is reachable.
 
-```consle
+```console
 $ ansible all -i "runner<n>.lab.mpt.local," -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu -m ping
 
 ```
@@ -105,8 +124,7 @@ To ping all hosts in the inventory file,
 $ ansible all -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu -m ping
 ```
 
-Note the ***all*** after the **ansible** command.
-
+Note the ***all*** after the **ansible** command. You should prompt to confirm to add to the known_hosts file.
 
 ### Exercise 4 - Clone the Ansible Project from GitHub
 
@@ -126,26 +144,6 @@ To brow the directory structure, you can run the Linux command tree.
 $ cd ~/bootcamp/ansible
 $ tree
 ```
-
-### Exercise 5 - Copy the Ansible sudo user (ubuntu) SSH key
-
-At the control machine,
-
-```console
-$ mkdir -p ~/.ssh
-$ sudo cp /home/ubuntu/.ssh/id_rsa ~/.ssh/id_rsa_ubuntu
-$ sudo chown $USER: ~/.ssh/id_rsa/id_rsa_ubuntu
-ls -ltr ~/.ssh
-
-```
-
-You should see something like below.
-
-```
-student1@console1:~$ ls -la ~/.ssh
-drwxrwxr-x 2 student1 student1 4096 Sep 16 03:01 .
-drwxr-xr-x 5 student1 student1 4096 Sep 16 03:57 ..
--rw------- 1 student1 student1 1675 Sep 16 03:01 id_rsa_ubuntu
 
 ---
 ## LAB1 - End

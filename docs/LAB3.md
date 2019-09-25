@@ -69,7 +69,7 @@ $ ssh -Q -kex
 $ ssh -vv runner<n>.lab.mpt.local
 ```
 
-### Exercise 3 - Generate SSH key pair
+### Exercise 3 - Generate a SSH key pair
 
 ```console 
 $ mkdir -p ~/.ssh
@@ -78,7 +78,7 @@ $ ssh-keygen -t rsa -b 2048 -C "$USER" -N "" -f id_rsa
 $ ls -ltr 
 ```
 
-### Exercise 4 - Copy the public to the managed node using Ansible CLI
+### Exercise 4 - Copy the public key to the managed node using Ansible CLI
 
 ```console
 # Ping the if the remote host is reachable by Ansible

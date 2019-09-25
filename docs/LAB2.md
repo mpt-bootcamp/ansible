@@ -36,13 +36,13 @@ Create a *lab2a.yml* file and copy contents of the simple playbook above to the 
 
 ```console
 $ cd ~/bootcamp/ansible/playbooks
-$ vi lab2.yml
+$ vi lab2a.yml
 ```
 
 Next, execute the playbook.
 
 ```console
-$ ansible-playbook lab2a.yml
+$ ansible-playbook -i "runner<n>.lab.mpt.local," -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu lab2a.yml
 ```
 
 #### Excercise 2 - Working with Variables
@@ -71,14 +71,14 @@ Create a new playbook file, *lab2b.yml* and paste the contents below to the file
 Run the playbook. You should see it runs but no change because it is already installed. It is the same as lab2a except the installing package represent as a variable instead a literal value. 
 
 ```console
-$ ansible-playbook lab2b.yml
+$ ansible-playbook -i "runner<n>.lab.mpt.local," -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu lab2b.yml
 ```
 
 #### Exercise 3 - Using Loops
 
 Loops are typically used to repeat a task using different input values. In this exercise, we will loop over a list of packages to install.
 
-Create a playbook file, lab3a.yml, and copy the following contents to it. Here we will install 3 packages - unzip, tree, and ntp.
+Create a playbook file, lab2c.yml, and copy the following contents to it. Here we will install 3 packages - unzip, tree, and ntp.
 
 ```
 ---
@@ -100,7 +100,7 @@ Create a playbook file, lab3a.yml, and copy the following contents to it. Here w
 Now, run the playbook see how it works.
 
 ```console
-$ ansible-playbook lab2b.yml
+$ ansible-playbook -i "runner<n>.lab.mpt.local," -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu lab2c.yml
 ```
 
 You can also repreent the list of packages in a variable like below:
@@ -130,7 +130,7 @@ Conditionals can be used to decide whether or not a task should be executed, bas
 
 In this exercise, we will create the playbook to check if PHP is installed and use the **debug** module to print the message and show the *register variable* of an output.
 
-Create and copy the contents below to a new playbook file, *lab4.yml* 
+Create and copy the contents below to a new playbook file, *lab2d.yml* 
 
 ```
 ---
@@ -152,13 +152,20 @@ Create and copy the contents below to a new playbook file, *lab4.yml*
       when: php_installed | failed
 ```
 
+To run the playbook,
+
+```console
+$ ansible-playbook -i "runner<n>.lab.mpt.local," -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu lab2d.yml
+```
+
+
 #### Exercise 5 - Defining and Triggering Handler
 
 A handlers is used to trigger a state change in a service, such as a restart or a stop. It is only executed when a notify directive is called in a task. 
 
 In this exercise, we will create a playbook to install Apache2 and see how to use a restart handler after enabling the Mod_Rewrite.
 
-Create a playbook file, *lab5.yml*, with the following lines.
+Create a playbook file, *lab2e.yml*, with the following lines.
 
 ```
 ---
@@ -167,14 +174,14 @@ Create a playbook file, *lab5.yml*, with the following lines.
 
   tasks:
     - name: Update apt-cache 
-       apt: update_cache=yes
+      apt: update_cache=yes
 
     - name: Install apache2
       apt: name=apache2 state=present
 
     - name: Enable Mod_Rewrite
       command: a2enmod rewrite
-      notiffy: restart apache
+      notify: restart apache
     
   handlers:
     - name: restart apache
@@ -182,6 +189,11 @@ Create a playbook file, *lab5.yml*, with the following lines.
     
 ```
 
+To test the playbook,
+
+```console
+$ ansible-playbook -i "runner<n>.lab.mpt.local," -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu lab2e.yml
+```
 
 
 
