@@ -24,7 +24,7 @@ runner<n>.lab.mpt.local
 
 ```console
 $ cd ~/bootcamp/ansible/playbooks
-$ ansible-playbook -i inventories/lab -u ubuntu $ --private-key=~/.ssh/id_rsa_ubuntu -v $ deploy-lamp.yml
+$ ansible-playbook -i inventories/lab -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu -v deploy-lamp.yml
 ```
 
 ### Exercise 3 - Deploy a Java web application
