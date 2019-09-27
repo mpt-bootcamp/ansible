@@ -196,7 +196,43 @@ $ ansible-playbook -i "runner<n>.lab.mpt.local," -u ubuntu --private-key=~/.ssh/
 ```
 
 
+#### Exercise 6 - Using Modules
 
+Ansible ships with a number of [modules](https://docs.ansible.com/ansible/latest/modules/modules_by_category.html) that can be executed directly on remote hosts or through Playbooks.
+
+In this exercise, we will download a zip file, unzip it and print out the register output.
+
+Create a playbook file, *lab2f.yml*, with the following lines.
+
+```
+---
+- hosts: all
+  become: true
+
+  tasks:
+    - name: download a zip file
+      get_url:
+        url: "https://github.com/mpt-bootcamp/assets-manager/releases/download/v1.0.0/assets-manager-1.0.0.zip"
+        dest: "/tmp/assets-manager.zip"
+
+    - name: unpackage
+      unarchive:
+        src: "/tmp/assets-manager.zip"
+        dest: "/tmp"    
+        remote_src: yes
+      register: unzip_output
+
+    - name: show unzip output
+      debug: 
+        var: unzip_output
+
+```
+
+Run the playbook,
+
+```console
+$ ansible-playbook -i "runner<n>.lab.mpt.local," -u ubuntu --private-key=~/.ssh/id_rsa_ubuntu lab2f.yml
+```
 
 ---
 ## LAB2 - End
