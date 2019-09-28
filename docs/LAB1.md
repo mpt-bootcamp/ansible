@@ -103,7 +103,7 @@ Add or append the following lines to the host file, */etc/ansible/hosts*.
 runner<n>.lab.mpt.local
 
 [db]
-runner20.lab.mpt.local
+runner1.lab.mpt.local
 
 ```
 
