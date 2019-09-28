@@ -1,7 +1,7 @@
 ## LAB3 - SSH Basic and Privilege Escalation
 ---
 
-### SSH Basic
+### SSH Basics
 
 Ansible uses native OpenSSH for remote communication and SSH keys for authentication. Although password authentication is supported, it is not recommended for security best practice. Also using password is not convenient when playbooks have to be run non-interactive mode.
 
@@ -43,8 +43,34 @@ In this exercise an SSH keypair is generated for setting up passwordless access 
 ```console 
 $ mkdir -p ~/.ssh
 $ cd ~/.ssh
+```
+
+```console 
 $ ssh-keygen -t rsa -N "" -f id_rsa
+Generating public/private rsa key pair.
+Your identification has been saved in id_rsa.
+Your public key has been saved in id_rsa.pub.
+The key fingerprint is:
+SHA256:JJqjjbkMd5z7BthmKCkrt70f5YV8BDzqQELKtGw9y68 student1@ip-10-250-200-205
+The key's randomart image is:
++---[RSA 2048]----+
+| o.    ..        |
+|+.+ .   o.       |
+|.= =  .....      |
+|. . +o.+ o       |
+| . *+o  S o      |
+|+ o**o.o o       |
+|oo=o=o. .        |
+|o+.+....         |
+|..+E+=o          |
++----[SHA256]-----+
+```
+
+```console 
 $ ls -ltr 
+-rw-r--r-- 1 student1 student1  408 Sep 28 08:06 id_rsa.pub
+-rw------- 1 student1 student1 1679 Sep 28 08:06 id_rsa
+
 ```
 id_rsa is the private key and id_rsa.pub is the public key. 
 
@@ -69,13 +95,34 @@ Now test the SSH connection using the SSH key pair
 $ ssh $USER@runner<n>.lab.mpt.local
 ```
 
-Show the sudoers setting for runner<n> on managed node.
-TBD
+You can verify that the content of id_rsa.pub from the control machine is added to ~/.ssh/authorized_key on the managed node.
+
+```console
+$ cat ~/.ssh/authorized_keys 
+```
 
 ### Exercise 4 - Run a playbook passwordless as runner user
 
-$ ansible-playbook --private-key=~/.ssh/id_rsa -u runner<n> playbook.yml
-TBD
+Create playbook lab3.yml to list the content under /tmp on the managed node.
+
+```console
+---
+- hosts: all
+  become: false
+
+  tasks:
+    - name: List the content under /tmp
+      shell: ls -al /tmp/
+      register: output
+
+    - debug: var=output
+```
+
+Run the playbook, with a simpler command-line by taking advantage of using defaults.
+
+```console
+$ ansible-playbook -i runner<n>.lab.mpt.local, lab3.yml 
+```
 
 ---
 ## LAB3 - End
